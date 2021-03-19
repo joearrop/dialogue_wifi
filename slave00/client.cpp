@@ -16,17 +16,20 @@ Client::Client(QObject *parent) : QObject(parent)
     qDebug()<<"timer started";
 }
 
-bool Client::connectToHost(){
+bool Client::connectToHost(char* ipv4,int timeThresholdms){
     qDebug()<<"Connexion...";
-    socket->connectToHost("192.168.1.42", 10000);
-    bool connected = socket->waitForConnected(10000);
+    socket->connectToHost(ipv4, timeThresholdms);
+    bool connected = socket->waitForConnected(timeThresholdms);
     if(connected){
-        socket->write("0102101205051054540");
-        int available = socket->bytesAvailable();
-        qDebug() << QObject::tr("bytes available : %1").arg(available) << endl;
+        socket->write("Chariot conneté");
+        qDebug() << QObject::tr("Connecté avec le PC-SOL") << endl;
     }
     else{
         qDebug()<<"Error to connect: " << socket -> error()<<endl;
     }
     return connected;
+}
+
+bool Client::connectToHost(){
+    return Client::connectToHost("192.168.1.42",10000);
 }

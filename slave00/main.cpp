@@ -13,13 +13,6 @@
 #include <thread>
 #include <chrono>
 
-static std::string getAnswer()
-{
-    std::string answer;
-    std::cin >> answer;
-    return answer;
-}
-
 struct timeval startTime,debutTimer;
 QSerialPort serial;
 QVector<QString> historical, reception;
@@ -42,11 +35,36 @@ QByteArray readSerialData(){
     return dataRead;
 }
 
+int openSerialPort(QString serialPortName,int serialPortBaudRate){
+    if (!serial.open(QIODevice::ReadWrite)) {//Serial open error
+           qDebug() << "Failed to open port %1, error: " << serial.error() << " - " << serial.errorString() << endl;
+           return 0;
+    }
+    else
+    {
+        qDebug() << "Connected To Port " << serialPortName << endl;
+        serial.setBaudRate(serialPortBaudRate); //Serial Communication BaudRate
+        serial.setDataBits(QSerialPort::Data8); //8 bit cell packet
+        serial.setParity(QSerialPort::NoParity); //No parity check every cell packet
+        serial.setStopBits(QSerialPort::OneStop); //One Stop bit
+        serial.setFlowControl(QSerialPort::NoFlowControl);//No hardware and no software flow control (handshake etc)
+        if (serial.error() == QSerialPort::ReadError) {
+            qDebug() << QObject::tr("Failed to read from port %1, error: %2").arg(serialPortName).arg(serial.errorString()) << endl;
+            return 0;
+        }
+        else{
+            return 1;
+        }
+    }
+
+
+}
+
 void closeSerialPort(QString path) //Déconnexion RS232
 {
     QTextStream outTerminal(stdout);
     serial.close();
-    outTerminal << QObject::tr("Serial Port Closed Succesfully");
+    qDebug() << "Serial Port Closed Succesfully"<<endl;
     if((!reception.isEmpty())||(!historical.isEmpty()))
     {
         QFile fileReception, fileHistorical;
@@ -76,25 +94,25 @@ void closeSerialPort(QString path) //Déconnexion RS232
     #endif
 }
 
-int main(int argc, char *argv[])
-{
-    QTextStream sortieTerminal(stdout);
-    QTextStream entreeTerminal(stdin);
+int main(int argc, char *argv[]){
+    QTextStream sortieTerminal(stdout), entreeTerminal(stdin);
     QApplication app(argc, argv);
-    QApplication::setApplicationDisplayName(Client::tr("Fortune Client"));
+    QByteArray sock,dataRead;
     Client client;
     QString path = "/media/virtualram/";
+    int iter, iterMax;
     bool comEnCours = true;
-    //    client.show();
-    //Init
-    gettimeofday(&debutTimer,NULL);
-    reception.reserve(3000); //Réservation mémoire
-    historical.reserve(3000);
-    reception.resize(0); //Taille 0
-    historical.resize(0);
 
-    int argumentCount = QApplication::arguments().size(); //nbre arguments
-    QStringList argumentList = QApplication::arguments(); //nom des arguments
+    //Init
+    QApplication::setApplicationDisplayName(Client::tr("Fortune Client"));
+    gettimeofday(&debutTimer,NULL);
+    reception.reserve(3000); //Memory reservation
+    historical.reserve(3000);//??
+    reception.resize(0); //Taille 0
+    historical.resize(0);//??
+
+    int argumentCount = QApplication::arguments().size(); //number of arguments
+    QStringList argumentList = QApplication::arguments(); //arguments list
 
     if (argumentCount == 1  ) {
         sortieTerminal << QObject::tr("Usage %1 <serialportname> [baudrate]").arg(argumentList.first()) << endl;
@@ -103,38 +121,16 @@ int main(int argc, char *argv[])
     QString serialPortName = argumentList.at(1);
     serial.setPortName(serialPortName);
 
-    int serialPortBaudRate = (argumentCount > 2) ? argumentList.at(2).toInt() : QSerialPort::Baud19200; //19200 par defaut
+    int serialPortBaudRate = (argumentCount > 2) ? argumentList.at(2).toInt() : QSerialPort::Baud19200; //19200 default
 
-    if (!serial.open(QIODevice::ReadWrite)) {
-           sortieTerminal << QObject::tr("Failed to open port %1, error: %2 - %3").arg(serialPortName).arg(serial.error()).arg(serial.errorString()) << endl;
-           return 1;
-    }
-    else
-    {
-        sortieTerminal << QObject::tr("Connected To Port %1").arg(serialPortName) << endl;
-        serial.setBaudRate(serialPortBaudRate);
-        serial.setDataBits(QSerialPort::Data8); //Correcte
-        serial.setParity(QSerialPort::NoParity); //Correcte, avant il y avait: QSerialPort::EvenParity
-        serial.setStopBits(QSerialPort::OneStop); //Correcte
-        serial.setFlowControl(QSerialPort::NoFlowControl);//sais pas
-    }
+    openSerialPort(serialPortName,serialPortBaudRate); //Open Serial port
 
-    if (serial.error() == QSerialPort::ReadError) {
-               sortieTerminal << QObject::tr("Failed to read from port %1, error: %2").arg(serialPortName).arg(serial.errorString()) << endl;
-               return 1;
-    }
-    /*char arr[3] = {0x02, 0x04, 0x46};
-    char arrF[3] = {0x32, 0x34, 0x46};
-    QByteArray ba(arr, 3);
-    QByteArray baF(arrF, 3);*/
-
-    QByteArray sock,dataRead;
-
-    int iterMax = (argumentCount > 3) ? argumentList.at(3).toInt() : -1; //"infinit" par defaut
-    int iter = 0;
+    iterMax = (argumentCount > 3) ? argumentList.at(3).toInt() : -1; //Default = while(1)
+    iter = 0;
 
     client.connectToHost();
-    while (comEnCours) {
+    while (iter>iterMax && iterMax>=0) {
+        //Implement broadcast search for PC-SOL ipv4 in order to use dynamic ipv4 adress in PC-SOL
 
         client.socket ->waitForReadyRead();
         sock = client.socket->readAll();
@@ -146,8 +142,8 @@ int main(int argc, char *argv[])
         qDebug() << "dataRead HEX:" << dataRead.toHex()<<endl;
         qDebug() << "client.socket->write(dataRead):" << client.socket->write(dataRead)<<endl;
 
-        if(iter>iterMax && iterMax>=0)
-            comEnCours = false;
+        if(iter = INT_MAX-100)//to avoid overflow
+            iter = 0;
         iter++;
     }
     sortieTerminal << QObject::tr("closeSerialPort") << endl;
