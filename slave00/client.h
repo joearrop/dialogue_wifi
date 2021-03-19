@@ -15,6 +15,7 @@ public:
     QTcpSocket *socket;
 
 public slots:
+   bool connectToHost(char* ipv4,int timeThresholdms);
    bool connectToHost();
 
 private:

@@ -128,8 +128,11 @@ int main(int argc, char *argv[]){
     iterMax = (argumentCount > 3) ? argumentList.at(3).toInt() : -1; //Default = while(1)
     iter = 0;
 
+    //QWidget window;
+    //window.show();
+
     client.connectToHost();
-    while (iter>iterMax && iterMax>=0) {
+    while (iter<iterMax || iterMax<0){
         //Implement broadcast search for PC-SOL ipv4 in order to use dynamic ipv4 adress in PC-SOL
 
         client.socket ->waitForReadyRead();
@@ -146,8 +149,9 @@ int main(int argc, char *argv[]){
             iter = 0;
         iter++;
     }
-    sortieTerminal << QObject::tr("closeSerialPort") << endl;
+    sortieTerminal << QObject::tr("disconnectiong from host") << endl;
     client.socket->disconnectFromHost();
+    sortieTerminal << QObject::tr("closeSerialPort") << endl;
     closeSerialPort(path);
     return app.exec();
 }
