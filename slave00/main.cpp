@@ -12,6 +12,9 @@
 #include <future>
 #include <thread>
 #include <chrono>
+#include <ctime>
+
+#define CONNECYCICLESEC 10
 
 struct timeval startTime,debutTimer;
 QSerialPort serial;
@@ -100,8 +103,9 @@ int main(int argc, char *argv[]){
     QByteArray sock,dataRead;
     Client client;
     QString path = "/media/virtualram/";
-    int iter, iterMax;
-    bool comEnCours = true;
+    int iter, iterMax,socketWrite = 0;
+    bool comEnCours = true, connectedToHost = false;
+    std::time_t reconnectTime;
 
     //Init
     QApplication::setApplicationDisplayName(Client::tr("Fortune Client"));
@@ -121,37 +125,59 @@ int main(int argc, char *argv[]){
     QString serialPortName = argumentList.at(1);
     serial.setPortName(serialPortName);
 
-    int serialPortBaudRate = (argumentCount > 2) ? argumentList.at(2).toInt() : QSerialPort::Baud19200; //19200 default
+    int serialPortBaudRate = (argumentCount > 2) ? argumentList.at(2).toInt() : QSerialPort::Baud38400; //38400 default
 
     openSerialPort(serialPortName,serialPortBaudRate); //Open Serial port
 
     iterMax = (argumentCount > 3) ? argumentList.at(3).toInt() : -1; //Default = while(1)
     iter = 0;
 
-    //QWidget window;
-    //window.show();
+    QWidget window;
+    window.show();
 
-    client.connectToHost();
+    connectedToHost = client.connectToHost();
+    reconnectTime = std::time(nullptr);
+
     while (iter<iterMax || iterMax<0){
         //Implement broadcast search for PC-SOL ipv4 in order to use dynamic ipv4 adress in PC-SOL
 
-        client.socket ->waitForReadyRead();
-        sock = client.socket->readAll();
-        qDebug() << "lecture wifi HEX:" << sock.toHex()<<endl;
-        //QThread::sleep(3);
-        qDebug() << "serial.write(sock):" << serial.write(sock)<<endl;
-
         dataRead = readSerialData();
         qDebug() << "dataRead HEX:" << dataRead.toHex()<<endl;
-        qDebug() << "client.socket->write(dataRead):" << client.socket->write(dataRead)<<endl;
 
-        if(iter = INT_MAX-100)//to avoid overflow
+        if(connectedToHost){
+            client.socket->waitForReadyRead();
+            sock = client.socket->readAll();
+
+            qDebug() << "lecture wifi HEX:" << sock.toHex()<<endl;
+            //QThread::sleep(3);
+            qDebug() << "serial.write(sock):" << serial.write(sock)<<endl;
+
+            socketWrite = client.socket->write(dataRead);
+
+            qDebug() << "client.socket->write(dataRead):" << socketWrite<<endl;
+
+            if(socketWrite<0){//check disconecthost
+                client.socket->disconnectFromHost();
+                connectedToHost = false;
+            }
+        }
+        else{
+            qDebug() << "serial.write(vide):" << serial.write(QByteArray())<<endl; //writes null array to continue the flux of communication
+
+            if(std::difftime(std::time(nullptr),reconnectTime) > CONNECYCICLESEC){ //try to reconnect after CONNECYCICLESEC seconds
+                connectedToHost = client.connectToHost();//Implement broadcast search for PC-SOL ipv4 in order to use dynamic ipv4 adress in PC-SOL
+                reconnectTime = std::time(nullptr);
+            }
+        }
+
+        if(iter == INT_MAX-100)//to avoid overflow
             iter = 0;
         iter++;
     }
     sortieTerminal << QObject::tr("disconnectiong from host") << endl;
     client.socket->disconnectFromHost();
-    sortieTerminal << QObject::tr("closeSerialPort") << endl;
-    closeSerialPort(path);
-    return app.exec();
+    sortieTerminal << QObject::tr("closing Serial Port") << endl;
+    //closeSerialPort(path);
+    //return app.exec();
+    return 0;
 }

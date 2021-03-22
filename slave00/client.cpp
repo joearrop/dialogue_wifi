@@ -31,5 +31,5 @@ bool Client::connectToHost(char* ipv4,int timeThresholdms){
 }
 
 bool Client::connectToHost(){
-    return Client::connectToHost("192.168.1.42",10000);
+    return Client::connectToHost("192.168.1.46",10000);
 }
