@@ -145,21 +145,28 @@ int main(int argc, char *argv[]){
         qDebug() << "dataRead HEX:" << dataRead.toHex()<<endl;
 
         if(connectedToHost){
-            client.socket->waitForReadyRead();
-            sock = client.socket->readAll();
+            if(client.socket->waitForReadyRead()){
+                sock = client.socket->readAll();
 
-            qDebug() << "lecture wifi HEX:" << sock.toHex()<<endl;
-            //QThread::sleep(3);
-            qDebug() << "serial.write(sock):" << serial.write(sock)<<endl;
+                qDebug() << "lecture wifi HEX:" << sock.toHex()<<endl;
+                //QThread::sleep(3);
+                qDebug() << "serial.write(sock):" << serial.write(sock)<<endl;
 
-            socketWrite = client.socket->write(dataRead);
+                socketWrite = client.socket->write(dataRead);
 
-            qDebug() << "client.socket->write(dataRead):" << socketWrite<<endl;
+                qDebug() << "client.socket->write(dataRead):" << socketWrite<<endl;
 
-            if(socketWrite<0){//check disconecthost
+                if(socketWrite<0){// disconnect if its not possible to send data to host
+                    client.socket->disconnectFromHost();
+                    connectedToHost = false;
+                }
+            }
+            else{//disconnect if host doesnt answer for 30 sec
                 client.socket->disconnectFromHost();
                 connectedToHost = false;
+                qDebug() << "serial.write(vide):" << serial.write(QByteArray())<<endl; //writes null array to continue the flux of communication
             }
+
         }
         else{
             qDebug() << "serial.write(vide):" << serial.write(QByteArray())<<endl; //writes null array to continue the flux of communication
