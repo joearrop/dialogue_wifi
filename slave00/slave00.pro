@@ -59,8 +59,13 @@ QT -= gui
 QT += widgets
 HEADERS += client.h \
     serial.h \
-    ConsoleReader.h
+    ConsoleReader.h \
+    mainwindow.h
 SOURCES += main.cpp \
         client.cpp \
     serial.cpp \
-    ConsoleReader.cpp
+    ConsoleReader.cpp \
+    mainwindow.cpp
+
+FORMS += \
+    mainwindow.ui

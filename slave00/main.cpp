@@ -1,9 +1,6 @@
 ﻿#include <sys/time.h>
 #include <QtSerialPort/QSerialPort>
 #include <QApplication>
-#include "client.h"
-#include "serial.h"
-#include "ConsoleReader.h"
 #include <QtWidgets>
 #include <QString>
 #include <sstream>
@@ -13,6 +10,10 @@
 #include <thread>
 #include <chrono>
 #include <ctime>
+#include "client.h"
+#include "serial.h"
+#include "ConsoleReader.h"
+#include "mainwindow.h"
 
 #define CONNECYCICLESEC 10
 
@@ -100,6 +101,7 @@ void closeSerialPort(QString path) //Déconnexion RS232
 int main(int argc, char *argv[]){
     QTextStream sortieTerminal(stdout), entreeTerminal(stdin);
     QApplication app(argc, argv);
+    MainWindow window;
     QByteArray sock,dataRead;
     Client client;
     QString path = "/media/virtualram/";
@@ -132,7 +134,6 @@ int main(int argc, char *argv[]){
     iterMax = (argumentCount > 3) ? argumentList.at(3).toInt() : -1; //Default = while(1)
     iter = 0;
 
-    QWidget window;
     window.show();
 
     client.getServerIPv4ThroughUDPBroadcast();
@@ -192,6 +193,5 @@ int main(int argc, char *argv[]){
     client.TCPsocket->disconnectFromHost();
     sortieTerminal << QObject::tr("closing Serial Port") << endl;
     //closeSerialPort(path);
-    //return app.exec();
-    return 0;
+    return app.exec();
 }
