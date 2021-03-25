@@ -7,7 +7,7 @@ class ConsoleReader : public QObject
 {
     Q_OBJECT
 public:
-    explicit ConsoleReader(QObject *parent = 0);
+    explicit ConsoleReader(QObject *parent = nullptr);
     QString getText();
 signals:
     void textReceived(QString message);

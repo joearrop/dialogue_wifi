@@ -135,6 +135,10 @@ int main(int argc, char *argv[]){
     QWidget window;
     window.show();
 
+    client.getServerIPv4ThroughUDPBroadcast();
+
+    client.readPendingDatagrams();
+
     connectedToHost = client.connectToHost();
     reconnectTime = std::time(nullptr);
 
@@ -143,35 +147,38 @@ int main(int argc, char *argv[]){
 
         dataRead = readSerialData();
         qDebug() << "dataRead HEX:" << dataRead.toHex()<<endl;
+        qDebug() << "Connected to Host:" << connectedToHost <<endl;
 
         if(connectedToHost){
-            if(client.socket->waitForReadyRead()){
-                sock = client.socket->readAll();
+            if(client.TCPsocket->waitForReadyRead()){
+                sock = client.TCPsocket->readAll();
 
                 qDebug() << "lecture wifi HEX:" << sock.toHex()<<endl;
                 //QThread::sleep(3);
                 qDebug() << "serial.write(sock):" << serial.write(sock)<<endl;
 
-                socketWrite = client.socket->write(dataRead);
+                socketWrite = client.TCPsocket->write(dataRead);
 
                 qDebug() << "client.socket->write(dataRead):" << socketWrite<<endl;
 
                 if(socketWrite<0){// disconnect if its not possible to send data to host
-                    client.socket->disconnectFromHost();
+                    client.TCPsocket->disconnectFromHost();
                     connectedToHost = false;
                 }
             }
             else{//disconnect if host doesnt answer for 30 sec
-                client.socket->disconnectFromHost();
+                client.TCPsocket->disconnectFromHost();
                 connectedToHost = false;
-                qDebug() << "serial.write(vide):" << serial.write(QByteArray())<<endl; //writes null array to continue the flux of communication
+                qDebug() << "serial.write(vide1):" << serial.write(QByteArray())<<endl; //writes null array to continue the flux of communication
             }
 
         }
         else{
-            qDebug() << "serial.write(vide):" << serial.write(QByteArray())<<endl; //writes null array to continue the flux of communication
+            qDebug() << "serial.write(vide2):" << serial.write(QByteArray())<<endl; //writes null array to continue the flux of communication
 
             if(std::difftime(std::time(nullptr),reconnectTime) > CONNECYCICLESEC){ //try to reconnect after CONNECYCICLESEC seconds
+                client.readPendingDatagrams();
+
                 connectedToHost = client.connectToHost();//Implement broadcast search for PC-SOL ipv4 in order to use dynamic ipv4 adress in PC-SOL
                 reconnectTime = std::time(nullptr);
             }
@@ -182,7 +189,7 @@ int main(int argc, char *argv[]){
         iter++;
     }
     sortieTerminal << QObject::tr("disconnectiong from host") << endl;
-    client.socket->disconnectFromHost();
+    client.TCPsocket->disconnectFromHost();
     sortieTerminal << QObject::tr("closing Serial Port") << endl;
     //closeSerialPort(path);
     //return app.exec();

@@ -10,13 +10,22 @@ class Client : public QObject
 {
     Q_OBJECT
 public:
-    explicit Client(QObject *parent = 0);
+    explicit Client(QObject *parent = nullptr);
+    void getServerIPv4ThroughUDPBroadcast();
+
     QObject *client_obj;
-    QTcpSocket *socket;
+    QTcpSocket *TCPsocket;
+    QUdpSocket *UDPsocket;
+    std::string ServerIPv4 = "192.168.1.42";
 
 public slots:
-   bool connectToHost(char* ipv4,int timeThresholdms);
-   bool connectToHost();
+    //TCP slots
+    bool connectToHost(const char* ipv4,int timeThresholdms);
+    bool connectToHost();
+    //UDP slots
+    void readPendingDatagrams();
+
+
 
 private:
 
