@@ -6,8 +6,7 @@
 #include <QString>
 #include <string>
 
-Client::Client(QObject *parent) : QObject(parent)
-{
+Client::Client(QObject *parent) : QObject(parent){
     TCPsocket = new QTcpSocket(this);
     UDPsocket = new QUdpSocket(this);
     //QTimer *timer = new QTimer();
@@ -19,7 +18,7 @@ Client::Client(QObject *parent) : QObject(parent)
 }
 
 void Client::getServerIPv4ThroughUDPBroadcast(){
-    qDebug()<<" start getIP"<<endl;
+    qDebug()<<" start getIP 222"<<endl;
     UDPsocket->bind(QHostAddress::Broadcast,10000); //To listen to the broadcast ipv4 (255.255.255.255), port 10000
 
     connect(UDPsocket,&QUdpSocket::readyRead, this,&Client::readPendingDatagrams); //Connect ready signal from UDP socket to a slot where we can process that

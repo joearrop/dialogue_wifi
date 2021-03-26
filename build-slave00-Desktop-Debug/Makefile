@@ -52,16 +52,16 @@ OBJECTS_DIR   = ./
 
 SOURCES       = ../slave00/main.cpp \
 		../slave00/client.cpp \
-		../slave00/serial.cpp \
 		../slave00/ConsoleReader.cpp \
-		../slave00/mainwindow.cpp moc_client.cpp \
+		../slave00/mainwindow.cpp \
+		../slave00/mainthread.cpp moc_client.cpp \
 		moc_ConsoleReader.cpp \
 		moc_mainwindow.cpp
 OBJECTS       = main.o \
 		client.o \
-		serial.o \
 		ConsoleReader.o \
 		mainwindow.o \
+		mainthread.o \
 		moc_client.o \
 		moc_ConsoleReader.o \
 		moc_mainwindow.o
@@ -155,13 +155,13 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
 		../slave00/slave00.pro ../slave00/client.h \
-		../slave00/serial.h \
 		../slave00/ConsoleReader.h \
-		../slave00/mainwindow.h ../slave00/main.cpp \
+		../slave00/mainwindow.h \
+		../slave00/mainthread.h ../slave00/main.cpp \
 		../slave00/client.cpp \
-		../slave00/serial.cpp \
 		../slave00/ConsoleReader.cpp \
-		../slave00/mainwindow.cpp
+		../slave00/mainwindow.cpp \
+		../slave00/mainthread.cpp
 QMAKE_TARGET  = slave00
 DESTDIR       = 
 TARGET        = slave00
@@ -379,8 +379,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../slave00/client.h ../slave00/serial.h ../slave00/ConsoleReader.h ../slave00/mainwindow.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../slave00/main.cpp ../slave00/client.cpp ../slave00/serial.cpp ../slave00/ConsoleReader.cpp ../slave00/mainwindow.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../slave00/client.h ../slave00/ConsoleReader.h ../slave00/mainwindow.h ../slave00/mainthread.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../slave00/main.cpp ../slave00/client.cpp ../slave00/ConsoleReader.cpp ../slave00/mainwindow.cpp ../slave00/mainthread.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents ../slave00/mainwindow.ui $(DISTDIR)/
 
 
@@ -450,17 +450,14 @@ compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean compiler_ui
 
 ####### Compile
 
-main.o: ../slave00/main.cpp ../slave00/client.h \
-		../slave00/serial.h \
-		../slave00/ConsoleReader.h
+main.o: ../slave00/main.cpp ../slave00/mainthread.h \
+		../slave00/client.h \
+		../slave00/ConsoleReader.h \
+		../slave00/mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../slave00/main.cpp
 
 client.o: ../slave00/client.cpp ../slave00/client.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o client.o ../slave00/client.cpp
-
-serial.o: ../slave00/serial.cpp ../slave00/client.h \
-		../slave00/serial.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o serial.o ../slave00/serial.cpp
 
 ConsoleReader.o: ../slave00/ConsoleReader.cpp ../slave00/ConsoleReader.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ConsoleReader.o ../slave00/ConsoleReader.cpp
@@ -468,6 +465,9 @@ ConsoleReader.o: ../slave00/ConsoleReader.cpp ../slave00/ConsoleReader.h
 mainwindow.o: ../slave00/mainwindow.cpp ../slave00/mainwindow.h \
 		ui_mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../slave00/mainwindow.cpp
+
+mainthread.o: ../slave00/mainthread.cpp ../slave00/mainthread.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainthread.o ../slave00/mainthread.cpp
 
 moc_client.o: moc_client.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_client.o moc_client.cpp
