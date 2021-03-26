@@ -22,15 +22,15 @@ int main(int argc, char *argv[]){
     MainWindow window;
     struct timeval debutTimer;
 
-    //envoyer
     mThread.argumentCount = QApplication::arguments().size(); //number of arguments
     mThread.argumentList = QApplication::arguments(); //arguments list
 
     //Init
-    QApplication::setApplicationDisplayName(Client::tr("Fortune Client"));
+    QApplication::setApplicationDisplayName(Client::tr("Axter Automation"));
     gettimeofday(&debutTimer,NULL);
 
     //GUI
+    //set stylesheet
     window.show();
 
     mThread.start();
