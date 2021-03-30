@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <string>
 
 namespace Ui {
 class MainWindow;
@@ -15,6 +16,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void LogPCSOL(QString msg);
+    void LogChariot(QString msg);
 private:
     Ui::MainWindow *ui;
 };

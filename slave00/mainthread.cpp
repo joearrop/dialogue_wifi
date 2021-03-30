@@ -15,6 +15,7 @@
 #include "client.h"
 #include "ConsoleReader.h"
 #include "mainwindow.h"
+#include "LinkThreadGUI.h"
 
 
 MainThread::MainThread(){
@@ -43,6 +44,7 @@ void MainThread::run(){
 
     //Client
     client.getServerIPv4ThroughUDPBroadcast();
+    QThread::sleep(1); //just to give time to everything to be seted up before trying to read UDP datagrams
     client.readPendingDatagramsIP();
     connectedToHost = client.connectToHost();
     reconnectTime = std::time(nullptr);
@@ -53,8 +55,11 @@ void MainThread::run(){
     while (iter<iterMax || iterMax<0){
         //Implement broadcast search for PC-SOL ipv4 in order to use dynamic ipv4 adress in PC-SOL
         dataRead = readSerialData();
-        qDebug() << "dataRead HEX:" << dataRead.toHex()<<endl;
-        qDebug() << "Connected to Host:" << connectedToHost <<endl;
+        //qDebug() << "dataRead HEX:" << dataRead.toHex()<<endl;
+        link->send_feedback_Chariot("dataRead HEX:"+dataRead.toHex());
+
+        //qDebug() << "Connected to Host:" << connectedToHost <<endl;
+         link->send_feedback_PCSOL("Connected to Host: "+connectedToHost);
 
         if(connectedToHost){
             //Receive data from PC-SOL through TCP/IP
@@ -62,15 +67,16 @@ void MainThread::run(){
             if(client.TCPsocket->waitForReadyRead()){
                 sock = client.TCPsocket->readAll();
 
-                qDebug() << "lecture wifi HEX:" << sock.toHex()<<endl;
+                //qDebug() << "lecture wifi HEX:" << sock.toHex()<<endl;
+                link->send_feedback_PCSOL("lecture wifi HEX:" + sock.toHex());
                 //QThread::sleep(3);
-                qDebug() << "serial.write(sock):" << serial->write(sock)<<endl;
-
-                qDebug() << "test"<<endl;
+                //qDebug() << "serial.write(sock):" << serial->write(sock)<<endl;
+                link->send_feedback_Chariot("serial.write(sock):" + serial->write(sock));
 
                 socketWrite = client.TCPsocket->write(dataRead);
 
-                qDebug() << "client.socket->write(dataRead):" << socketWrite<<endl;
+                //qDebug() << "client.socket->write(dataRead):" << socketWrite<<endl;
+                link->send_feedback_PCSOL("client.socket->write(dataRead):" + socketWrite);
 
                 if(socketWrite<0){// disconnect if its not possible to send data to host
                     client.TCPsocket->disconnectFromHost();
@@ -80,7 +86,8 @@ void MainThread::run(){
             else{//disconnect if host doesnt answer for 30 sec
                 client.TCPsocket->disconnectFromHost();
                 connectedToHost = false;
-                qDebug() << "serial.write(vide1):" << serial->write(QByteArray())<<endl; //writes null array to continue the flux of communication
+                //qDebug() << "serial.write(vide1):" << serial->write(QByteArray())<<endl; //writes null array to continue the flux of communication
+                link->send_feedback_Chariot("serial.write(vide1):" + serial->write(QByteArray()));
             }
             // */
             //Receive data from PC-SOL through UDP/IP
@@ -102,7 +109,8 @@ void MainThread::run(){
             }
         }
         else{
-            qDebug() << "serial.write(vide2):" << serial->write(QByteArray())<<endl; //writes null array to continue the flux of communication
+            //qDebug() << "serial.write(vide2):" << serial->write(QByteArray())<<endl; //writes null array to continue the flux of communication
+            link->send_feedback_Chariot("serial.write(vide2):" + serial->write(QByteArray()));
 
             if(std::difftime(std::time(nullptr),reconnectTime) > CONNECYCICLESEC){ //try to reconnect after CONNECYCICLESEC seconds
                 client.readPendingDatagramsIP();
@@ -116,9 +124,11 @@ void MainThread::run(){
             iter = 0;
         iter++;
     }
-    qDebug() << "disconnectiong from host" << endl;
+    //qDebug() << "disconnectiong from host" << endl;
+    link->send_feedback_PCSOL("disconnectiong from host");
     client.TCPsocket->disconnectFromHost();
-    qDebug() << "closing Serial Port"<< endl;
+    //qDebug() << "closing Serial Port"<< endl;
+    link->send_feedback_Chariot("closing Serial Port");
     closeSerialPort(path);
 
 }

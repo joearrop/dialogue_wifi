@@ -1,5 +1,6 @@
 ﻿#include <sys/time.h>
 #include <QtSerialPort/QSerialPort>
+#include <QObject>
 #include <QApplication>
 #include <QtWidgets>
 #include <QString>
@@ -14,6 +15,7 @@
 #include "client.h"
 #include "ConsoleReader.h"
 #include "mainwindow.h"
+#include "LinkThreadGUI.h"
 
 int main(int argc, char *argv[]){
     QTextStream sortieTerminal(stdout), entreeTerminal(stdin);
@@ -29,11 +31,21 @@ int main(int argc, char *argv[]){
     QApplication::setApplicationDisplayName(Client::tr("Axter Automation"));
     gettimeofday(&debutTimer,NULL);
 
+    LinkThreadGUI link;
+    mThread.link = &link;
+    //conect ui and thread
+    QObject::connect(&link,&LinkThreadGUI::feedback_PCSOL,&window,&MainWindow::LogPCSOL);
+    QObject::connect(&link,&LinkThreadGUI::feedback_Chariot,&window,&MainWindow::LogChariot);
+
     //GUI
     //set stylesheet
+
+    //show
     window.show();
 
+    //run main thread
     mThread.start();
+
 
     return app.exec();
 }

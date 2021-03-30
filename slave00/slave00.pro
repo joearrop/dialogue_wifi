@@ -57,15 +57,18 @@ QT += network
 QT += core
 QT -= gui
 QT += widgets
+QT += uitools
 HEADERS += client.h \
     ConsoleReader.h \
     mainwindow.h \
-    mainthread.h
+    mainthread.h \
+    LinkThreadGUI.h
 SOURCES += main.cpp \
         client.cpp \
     ConsoleReader.cpp \
     mainwindow.cpp \
-    mainthread.cpp
+    mainthread.cpp \
+    LinkThreadGUI.cpp
 
 FORMS += \
     mainwindow.ui

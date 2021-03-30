@@ -12,10 +12,10 @@ MAKEFILE      = Makefile
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DQT_QML_DEBUG -DQT_SERIALPORT_LIB -DQT_NETWORK_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
+DEFINES       = -DQT_QML_DEBUG -DQT_SERIALPORT_LIB -DQT_NETWORK_LIB -DQT_UITOOLS_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I../slave00 -I. -isystem /usr/include/x86_64-linux-gnu/qt5 -isystem /usr/include/x86_64-linux-gnu/qt5/QtSerialPort -isystem /usr/include/x86_64-linux-gnu/qt5/QtNetwork -isystem /usr/include/x86_64-linux-gnu/qt5/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt5/QtGui -isystem /usr/include/x86_64-linux-gnu/qt5/QtCore -I. -isystem /usr/include/libdrm -I. -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++
+INCPATH       = -I../slave00 -I. -isystem /usr/include/x86_64-linux-gnu/qt5 -isystem /usr/include/x86_64-linux-gnu/qt5/QtSerialPort -isystem /usr/include/x86_64-linux-gnu/qt5/QtNetwork -isystem /usr/include/x86_64-linux-gnu/qt5/QtUiTools -isystem /usr/include/x86_64-linux-gnu/qt5/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt5/QtGui -isystem /usr/include/x86_64-linux-gnu/qt5/QtCore -I. -isystem /usr/include/libdrm -I. -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++
 QMAKE         = /usr/lib/qt5/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -37,8 +37,8 @@ COMPRESS      = gzip -9f
 DISTNAME      = slave001.0.0
 DISTDIR = /home/agvaxter/Git/dialogue_wifi/build-slave00-Desktop-Debug/.tmp/slave001.0.0
 LINK          = g++
-LFLAGS        = 
-LIBS          = $(SUBLIBS) -lQt5SerialPort -lQt5Network -lQt5Widgets -lQt5Gui -lQt5Core -lGL -lpthread 
+LFLAGS        = -Wl,-rpath-link,/usr/lib/x86_64-linux-gnu
+LIBS          = $(SUBLIBS) -lQt5SerialPort -lQt5Network -lQt5UiTools -lQt5Widgets -lQt5Gui -lQt5Core -lGL -lpthread 
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -54,17 +54,23 @@ SOURCES       = ../slave00/main.cpp \
 		../slave00/client.cpp \
 		../slave00/ConsoleReader.cpp \
 		../slave00/mainwindow.cpp \
-		../slave00/mainthread.cpp moc_client.cpp \
+		../slave00/mainthread.cpp \
+		../slave00/LinkThreadGUI.cpp moc_client.cpp \
 		moc_ConsoleReader.cpp \
-		moc_mainwindow.cpp
+		moc_mainwindow.cpp \
+		moc_mainthread.cpp \
+		moc_LinkThreadGUI.cpp
 OBJECTS       = main.o \
 		client.o \
 		ConsoleReader.o \
 		mainwindow.o \
 		mainthread.o \
+		LinkThreadGUI.o \
 		moc_client.o \
 		moc_ConsoleReader.o \
-		moc_mainwindow.o
+		moc_mainwindow.o \
+		moc_mainthread.o \
+		moc_LinkThreadGUI.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/linux.conf \
@@ -157,11 +163,13 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		../slave00/slave00.pro ../slave00/client.h \
 		../slave00/ConsoleReader.h \
 		../slave00/mainwindow.h \
-		../slave00/mainthread.h ../slave00/main.cpp \
+		../slave00/mainthread.h \
+		../slave00/LinkThreadGUI.h ../slave00/main.cpp \
 		../slave00/client.cpp \
 		../slave00/ConsoleReader.cpp \
 		../slave00/mainwindow.cpp \
-		../slave00/mainthread.cpp
+		../slave00/mainthread.cpp \
+		../slave00/LinkThreadGUI.cpp
 QMAKE_TARGET  = slave00
 DESTDIR       = 
 TARGET        = slave00
@@ -170,7 +178,7 @@ TARGET        = slave00
 first: all
 ####### Build rules
 
-$(TARGET): ui_mainwindow.h $(OBJECTS)  
+$(TARGET): /usr/lib/x86_64-linux-gnu/libQt5UiTools.a ui_mainwindow.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: ../slave00/slave00.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
@@ -265,6 +273,7 @@ Makefile: ../slave00/slave00.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++
 		../slave00/slave00.pro \
 		/usr/lib/x86_64-linux-gnu/libQt5SerialPort.prl \
 		/usr/lib/x86_64-linux-gnu/libQt5Network.prl \
+		/usr/lib/x86_64-linux-gnu/libQt5UiTools.prl \
 		/usr/lib/x86_64-linux-gnu/libQt5Widgets.prl \
 		/usr/lib/x86_64-linux-gnu/libQt5Gui.prl \
 		/usr/lib/x86_64-linux-gnu/libQt5Core.prl
@@ -361,6 +370,7 @@ Makefile: ../slave00/slave00.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++
 ../slave00/slave00.pro:
 /usr/lib/x86_64-linux-gnu/libQt5SerialPort.prl:
 /usr/lib/x86_64-linux-gnu/libQt5Network.prl:
+/usr/lib/x86_64-linux-gnu/libQt5UiTools.prl:
 /usr/lib/x86_64-linux-gnu/libQt5Widgets.prl:
 /usr/lib/x86_64-linux-gnu/libQt5Gui.prl:
 /usr/lib/x86_64-linux-gnu/libQt5Core.prl:
@@ -379,8 +389,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../slave00/client.h ../slave00/ConsoleReader.h ../slave00/mainwindow.h ../slave00/mainthread.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../slave00/main.cpp ../slave00/client.cpp ../slave00/ConsoleReader.cpp ../slave00/mainwindow.cpp ../slave00/mainthread.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../slave00/client.h ../slave00/ConsoleReader.h ../slave00/mainwindow.h ../slave00/mainthread.h ../slave00/LinkThreadGUI.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../slave00/main.cpp ../slave00/client.cpp ../slave00/ConsoleReader.cpp ../slave00/mainwindow.cpp ../slave00/mainthread.cpp ../slave00/LinkThreadGUI.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents ../slave00/mainwindow.ui $(DISTDIR)/
 
 
@@ -413,23 +423,34 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -Wall -W -dM -E -o moc_predefs.h /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_client.cpp moc_ConsoleReader.cpp moc_mainwindow.cpp
+compiler_moc_header_make_all: moc_client.cpp moc_ConsoleReader.cpp moc_mainwindow.cpp moc_mainthread.cpp moc_LinkThreadGUI.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_client.cpp moc_ConsoleReader.cpp moc_mainwindow.cpp
+	-$(DEL_FILE) moc_client.cpp moc_ConsoleReader.cpp moc_mainwindow.cpp moc_mainthread.cpp moc_LinkThreadGUI.cpp
 moc_client.cpp: ../slave00/client.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/agvaxter/Git/dialogue_wifi/slave00 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtSerialPort -I/usr/include/x86_64-linux-gnu/qt5/QtNetwork -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../slave00/client.h -o moc_client.cpp
+	/usr/lib/qt5/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/agvaxter/Git/dialogue_wifi/slave00 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtSerialPort -I/usr/include/x86_64-linux-gnu/qt5/QtNetwork -I/usr/include/x86_64-linux-gnu/qt5/QtUiTools -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../slave00/client.h -o moc_client.cpp
 
 moc_ConsoleReader.cpp: ../slave00/ConsoleReader.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/agvaxter/Git/dialogue_wifi/slave00 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtSerialPort -I/usr/include/x86_64-linux-gnu/qt5/QtNetwork -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../slave00/ConsoleReader.h -o moc_ConsoleReader.cpp
+	/usr/lib/qt5/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/agvaxter/Git/dialogue_wifi/slave00 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtSerialPort -I/usr/include/x86_64-linux-gnu/qt5/QtNetwork -I/usr/include/x86_64-linux-gnu/qt5/QtUiTools -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../slave00/ConsoleReader.h -o moc_ConsoleReader.cpp
 
 moc_mainwindow.cpp: ../slave00/mainwindow.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/agvaxter/Git/dialogue_wifi/slave00 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtSerialPort -I/usr/include/x86_64-linux-gnu/qt5/QtNetwork -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../slave00/mainwindow.h -o moc_mainwindow.cpp
+	/usr/lib/qt5/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/agvaxter/Git/dialogue_wifi/slave00 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtSerialPort -I/usr/include/x86_64-linux-gnu/qt5/QtNetwork -I/usr/include/x86_64-linux-gnu/qt5/QtUiTools -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../slave00/mainwindow.h -o moc_mainwindow.cpp
+
+moc_mainthread.cpp: ../slave00/LinkThreadGUI.h \
+		../slave00/mainthread.h \
+		moc_predefs.h \
+		/usr/lib/qt5/bin/moc
+	/usr/lib/qt5/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/agvaxter/Git/dialogue_wifi/slave00 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtSerialPort -I/usr/include/x86_64-linux-gnu/qt5/QtNetwork -I/usr/include/x86_64-linux-gnu/qt5/QtUiTools -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../slave00/mainthread.h -o moc_mainthread.cpp
+
+moc_LinkThreadGUI.cpp: ../slave00/LinkThreadGUI.h \
+		moc_predefs.h \
+		/usr/lib/qt5/bin/moc
+	/usr/lib/qt5/bin/moc $(DEFINES) --include ./moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/agvaxter/Git/dialogue_wifi/slave00 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtSerialPort -I/usr/include/x86_64-linux-gnu/qt5/QtNetwork -I/usr/include/x86_64-linux-gnu/qt5/QtUiTools -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../slave00/LinkThreadGUI.h -o moc_LinkThreadGUI.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -451,6 +472,7 @@ compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean compiler_ui
 ####### Compile
 
 main.o: ../slave00/main.cpp ../slave00/mainthread.h \
+		../slave00/LinkThreadGUI.h \
 		../slave00/client.h \
 		../slave00/ConsoleReader.h \
 		../slave00/mainwindow.h
@@ -466,8 +488,15 @@ mainwindow.o: ../slave00/mainwindow.cpp ../slave00/mainwindow.h \
 		ui_mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../slave00/mainwindow.cpp
 
-mainthread.o: ../slave00/mainthread.cpp ../slave00/mainthread.h
+mainthread.o: ../slave00/mainthread.cpp ../slave00/mainthread.h \
+		../slave00/LinkThreadGUI.h \
+		../slave00/client.h \
+		../slave00/ConsoleReader.h \
+		../slave00/mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainthread.o ../slave00/mainthread.cpp
+
+LinkThreadGUI.o: ../slave00/LinkThreadGUI.cpp ../slave00/LinkThreadGUI.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o LinkThreadGUI.o ../slave00/LinkThreadGUI.cpp
 
 moc_client.o: moc_client.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_client.o moc_client.cpp
@@ -477,6 +506,12 @@ moc_ConsoleReader.o: moc_ConsoleReader.cpp
 
 moc_mainwindow.o: moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainwindow.o moc_mainwindow.cpp
+
+moc_mainthread.o: moc_mainthread.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainthread.o moc_mainthread.cpp
+
+moc_LinkThreadGUI.o: moc_LinkThreadGUI.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_LinkThreadGUI.o moc_LinkThreadGUI.cpp
 
 ####### Install
 
