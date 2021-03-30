@@ -3,8 +3,7 @@
 #include <QtCore>
 #include <QtSerialPort/QSerialPort>
 
-#define CONNECYCICLESEC 5
-
+#define CONNECYCICLESEC 2
 
 class MainThread : public QThread{
 public:

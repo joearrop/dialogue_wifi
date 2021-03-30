@@ -11,18 +11,22 @@ class Client : public QObject{
 public:
     explicit Client(QObject *parent = nullptr);
     void getServerIPv4ThroughUDPBroadcast();
+    void bindUDPcommsocket();
 
     QObject *client_obj;
     QTcpSocket *TCPsocket;
-    QUdpSocket *UDPsocket;
+    QUdpSocket *UDPsocketDiscovery;
+    QUdpSocket *UDPsocketComm;
     std::string ServerIPv4 = "192.168.1.42";
+    std::string SubNetBroadcastIPv4 = "192.168.1.255";
 
 public slots:
     //TCP slots
     bool connectToHost(const char* ipv4,int timeThresholdms);
     bool connectToHost();
     //UDP slots
-    void readPendingDatagrams();
+    void readPendingDatagramsIP();
+    QByteArray readUDPMsg();
 
 
 

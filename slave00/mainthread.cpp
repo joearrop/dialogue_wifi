@@ -43,7 +43,7 @@ void MainThread::run(){
 
     //Client
     client.getServerIPv4ThroughUDPBroadcast();
-    client.readPendingDatagrams();
+    client.readPendingDatagramsIP();
     connectedToHost = client.connectToHost();
     reconnectTime = std::time(nullptr);
 
@@ -57,12 +57,16 @@ void MainThread::run(){
         qDebug() << "Connected to Host:" << connectedToHost <<endl;
 
         if(connectedToHost){
+            //Receive data from PC-SOL through TCP/IP
+            // /*
             if(client.TCPsocket->waitForReadyRead()){
                 sock = client.TCPsocket->readAll();
 
                 qDebug() << "lecture wifi HEX:" << sock.toHex()<<endl;
                 //QThread::sleep(3);
                 qDebug() << "serial.write(sock):" << serial->write(sock)<<endl;
+
+                qDebug() << "test"<<endl;
 
                 socketWrite = client.TCPsocket->write(dataRead);
 
@@ -78,13 +82,30 @@ void MainThread::run(){
                 connectedToHost = false;
                 qDebug() << "serial.write(vide1):" << serial->write(QByteArray())<<endl; //writes null array to continue the flux of communication
             }
+            // */
+            //Receive data from PC-SOL through UDP/IP
+            /*
+            client.bindUDPcommsocket();
+            sock = client.readUDPMsg();
 
+            qDebug() << "lecture wifi HEX:" << sock.toHex()<<endl;
+            //QThread::sleep(3);
+            qDebug() << "serial.write(sock):" << serial->write(sock)<<endl;
+
+            socketWrite = client.TCPsocket->write(dataRead);
+
+            qDebug() << "client.socket->write(dataRead):" << socketWrite<<endl;
+            */
+            if(socketWrite<0){// disconnect if its not possible to send data to host
+                client.TCPsocket->disconnectFromHost();
+                connectedToHost = false;
+            }
         }
         else{
             qDebug() << "serial.write(vide2):" << serial->write(QByteArray())<<endl; //writes null array to continue the flux of communication
 
             if(std::difftime(std::time(nullptr),reconnectTime) > CONNECYCICLESEC){ //try to reconnect after CONNECYCICLESEC seconds
-                client.readPendingDatagrams();
+                client.readPendingDatagramsIP();
 
                 connectedToHost = client.connectToHost();
                 reconnectTime = std::time(nullptr);

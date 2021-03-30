@@ -5,10 +5,12 @@
 #include <QtWidgets>
 #include <QString>
 #include <string>
+#include <regex>
 
 Client::Client(QObject *parent) : QObject(parent){
     TCPsocket = new QTcpSocket(this);
-    UDPsocket = new QUdpSocket(this);
+    UDPsocketDiscovery = new QUdpSocket(this);
+    UDPsocketComm = new QUdpSocket(this);
     //QTimer *timer = new QTimer();
 
     /*connect(timer, SIGNAL(timeout()),this, SLOT(connectToHost()));
@@ -18,30 +20,63 @@ Client::Client(QObject *parent) : QObject(parent){
 }
 
 void Client::getServerIPv4ThroughUDPBroadcast(){
-    qDebug()<<" start getIP 222"<<endl;
-    UDPsocket->bind(QHostAddress::Broadcast,10000); //To listen to the broadcast ipv4 (255.255.255.255), port 10000
+    qDebug()<<"Getting PC-SOL IPv4 Address"<<endl;
+    UDPsocketDiscovery->bind(QHostAddress::Broadcast,10000); //To listen to the broadcast ipv4 (255.255.255.255), port 10000
 
-    connect(UDPsocket,&QUdpSocket::readyRead, this,&Client::readPendingDatagrams); //Connect ready signal from UDP socket to a slot where we can process that
+    connect(UDPsocketDiscovery,&QUdpSocket::readyRead, this,&Client::readPendingDatagramsIP); //Connect ready signal from UDP socket to a slot where we can process that
     qDebug()<<" end getIP"<<endl;
 }
 
-void Client::readPendingDatagrams(){
+void Client::bindUDPcommsocket(){
+    qDebug()<<"Connecting to subnet broadcast"<<SubNetBroadcastIPv4.c_str()<<endl;
+    UDPsocketComm->bind(QHostAddress(QString(SubNetBroadcastIPv4.c_str())),0); //To listen to the subnet broadcast ipv4 (e.g. 192.168.1.255), port 10000
+    connect(UDPsocketComm,&QUdpSocket::readyRead, this,&Client::readUDPMsg); //Connect ready signal from UDP socket to a slot where we can process that
+}
+
+void Client::readPendingDatagramsIP(){
+    QNetworkDatagram datagram;
+    std::regex ipv4_regex("\\d{1,3}[.]\\d{1,3}[.]\\d{1,3}[.]\\d{1,3}");
+    std::regex end_ipv4_regex("\\d{1,3}$");
+    std::smatch matches;
     qDebug()<<"start datagram"<<endl;
 
-    if(UDPsocket->hasPendingDatagrams()){
+    if(UDPsocketDiscovery->hasPendingDatagrams()){
         /*
-         I chqnged a "while" for a "if" so  its also necessary to
+         I changed a "while" for a "if" so  its also necessary to
         make sure that we dont have any problem if the first datagram
         fails or if we got a great number of messages from PC-SOL
         stacked in the broadcast
         */
-        QNetworkDatagram datagram = UDPsocket->receiveDatagram(); //receive UDP datagrams
-        qDebug() << "UDP datagram received" << datagram.data().toHex() << endl; //print HEX
-        qDebug() << "UDP datagram received" << datagram.data().toStdString().c_str() << endl; //print String
+        datagram = UDPsocketDiscovery->receiveDatagram(); //receive UDP datagrams
+        //qDebug() << "UDP datagram received" << datagram.data().toHex() << endl; //print HEX
+        qDebug() << "UDP Broadcast datagram received" << datagram.data().toStdString().c_str() << endl; //print String
 
-        ServerIPv4 = datagram.data().toStdString(); //att ipv4 address to connect
+        //(\d{1,3})[.](\d{1,3})[.](\d{1,3})[.](\d{1,3})
+        std::string temp = datagram.data().toStdString(); //It seems like regex_search doesnt allow to use a function that returns a std::string, like .toStdString()
+        std::regex_search(temp,matches,ipv4_regex);
+        if(matches.ready()){ //Use regex to make sure that it is a valid ip address
+            ServerIPv4 = temp; //att ipv4 address to connect
+            SubNetBroadcastIPv4 = std::regex_replace(temp,end_ipv4_regex,"255"); //get subnetbroadcast e.g. "192.168.1.42" -> "192.168.1.255"
+            //qDebug() << "SubNetBroadcastIPv4: " << SubNetBroadcastIPv4.c_str() << endl;
+            bindUDPcommsocket();
+        }
+        else{
+            qDebug() << "Invalid IPv4 Address received" <<endl;
+        }
     }
     qDebug()<<"end datagram"<<endl;
+}
+
+QByteArray Client::readUDPMsg(){
+    QByteArray data2return = QByteArray();
+    QNetworkDatagram datagram;
+    qDebug()<<"test1"<<endl;
+    while(UDPsocketComm->hasPendingDatagrams()){ //while theres datagrams to read
+        qDebug()<<"test2"<<endl;
+        datagram = UDPsocketComm->receiveDatagram(); //receive UDP datagrams
+        data2return.append(datagram.data()); //Appends the byte array
+    }
+    return data2return;
 }
 
 bool Client::connectToHost(const char* ipv4,int timeThresholdms){
