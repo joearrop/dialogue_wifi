@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+#define DISCONNECTCOMMAND 2
+
 class LinkThreadGUI : public QObject
 {
     Q_OBJECT
@@ -12,9 +14,13 @@ public:
     void send_feedback_PCSOL(QString msg);
     void send_feedback_Chariot(QString msg);
 
+    void send_UI_Command(int cmd);
+
 signals:
     void feedback_PCSOL(QString msg);
     void feedback_Chariot(QString msg);
+
+    void UI_Command(int cmd);
 
 public slots:
 };

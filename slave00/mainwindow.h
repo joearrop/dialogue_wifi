@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <string>
+#include "LinkThreadGUI.h"
 
 namespace Ui {
 class MainWindow;
@@ -16,9 +17,12 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    LinkThreadGUI *link;
 public slots:
     void LogPCSOL(QString msg);
     void LogChariot(QString msg);
+
+    void handleDisconnectButton();
 private:
     Ui::MainWindow *ui;
 };

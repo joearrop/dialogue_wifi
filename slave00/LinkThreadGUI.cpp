@@ -12,3 +12,7 @@ void LinkThreadGUI::send_feedback_PCSOL(QString msg){
 void LinkThreadGUI::send_feedback_Chariot(QString msg){
     emit feedback_Chariot(msg);
 }
+
+void LinkThreadGUI::send_UI_Command(int cmd){
+    emit UI_Command(cmd);
+}

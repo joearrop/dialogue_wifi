@@ -33,9 +33,12 @@ int main(int argc, char *argv[]){
 
     LinkThreadGUI link;
     mThread.link = &link;
-    //conect ui and thread
+    window.link = &link;
+
+    //conect ui and thread (n.b.: there might be some connections like these inside the classes MainWindow and LinkThreadGUI that I couldnt do here)
     QObject::connect(&link,&LinkThreadGUI::feedback_PCSOL,&window,&MainWindow::LogPCSOL);
     QObject::connect(&link,&LinkThreadGUI::feedback_Chariot,&window,&MainWindow::LogChariot);
+    QObject::connect(&link,&LinkThreadGUI::UI_Command,&mThread,&MainThread::Command);
 
     //GUI
     //set stylesheet

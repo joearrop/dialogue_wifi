@@ -19,6 +19,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTextEdit>
 #include <QtWidgets/QWidget>
@@ -34,6 +35,8 @@ public:
     QFrame *line;
     QLabel *label;
     QLabel *label_2;
+    QPushButton *buttDisconnect;
+    QPushButton *pushButton_2;
     QMenuBar *menubar;
     QMenu *menuTeste;
     QStatusBar *statusbar;
@@ -70,6 +73,12 @@ public:
         label_2 = new QLabel(centralwidget);
         label_2->setObjectName(QStringLiteral("label_2"));
         label_2->setGeometry(QRect(220, 290, 171, 17));
+        buttDisconnect = new QPushButton(centralwidget);
+        buttDisconnect->setObjectName(QStringLiteral("buttDisconnect"));
+        buttDisconnect->setGeometry(QRect(20, 230, 89, 25));
+        pushButton_2 = new QPushButton(centralwidget);
+        pushButton_2->setObjectName(QStringLiteral("pushButton_2"));
+        pushButton_2->setGeometry(QRect(110, 230, 89, 25));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
@@ -99,6 +108,8 @@ public:
         textEdit_1->setPlaceholderText(QString());
         label->setText(QApplication::translate("MainWindow", "Server Communication", Q_NULLPTR));
         label_2->setText(QApplication::translate("MainWindow", "Serial Communication", Q_NULLPTR));
+        buttDisconnect->setText(QApplication::translate("MainWindow", "Disconnect", Q_NULLPTR));
+        pushButton_2->setText(QApplication::translate("MainWindow", "Connect", Q_NULLPTR));
         menuTeste->setTitle(QApplication::translate("MainWindow", "Teste", Q_NULLPTR));
     } // retranslateUi
 

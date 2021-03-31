@@ -5,6 +5,7 @@
 #include "LinkThreadGUI.h"
 
 #define CONNECYCICLESEC 2
+#define TIMEOUTSEC 5
 
 class MainThread : public QThread{
     Q_OBJECT
@@ -18,6 +19,7 @@ public:
 
     LinkThreadGUI *link;
 
+    bool commRun = true;
     int argumentCount; //number of arguments
     QStringList argumentList; //arguments list
     QString serialPortName, path = "/media/virtualram/";
@@ -25,6 +27,8 @@ public:
     struct timeval startTime;
     QSerialPort *serial = new QSerialPort;
     QVector<QString> historical, reception;
+public slots:
+    void Command(int cmd);
 
 };
 
