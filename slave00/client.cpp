@@ -6,11 +6,15 @@
 #include <QString>
 #include <string>
 #include <regex>
+#include <chrono>
+#include <ctime>
+
 
 Client::Client(QObject *parent) : QObject(parent){
     TCPsocket = new QTcpSocket(this);
     UDPsocketDiscovery = new QUdpSocket(this);
     UDPsocketComm = new QUdpSocket(this);
+    UDPsocketBroadComm = new QUdpSocket(this);
     //QTimer *timer = new QTimer();
 
     /*connect(timer, SIGNAL(timeout()),this, SLOT(connectToHost()));
@@ -32,6 +36,14 @@ void Client::bindUDPcommsocket(){
     UDPsocketComm->bind(QHostAddress(QString(SubNetBroadcastIPv4.c_str())),10000); //To listen to the subnet broadcast ipv4 (e.g. 192.168.1.255), port 10000
     connect(UDPsocketComm,&QUdpSocket::readyRead, this,&Client::readUDPMsg); //Connect ready signal from UDP socket to a slot where we can process that
 }
+
+void Client::bindBroadcommsocket(){
+    qDebug()<<"Connecting to broadcast"<<endl;
+    UDPsocketBroadComm->bind(QHostAddress::Broadcast,8000); //To listen to the broadcast ipv4 (255.255.255.255), port 8000
+    connect(UDPsocketBroadComm,&QUdpSocket::readyRead, this,&Client::readBroadMsg); //Connect ready signal from UDP socket to a slot where we can process that
+}
+
+
 
 void Client::readPendingDatagramsIP(){
     QNetworkDatagram datagram;
@@ -70,10 +82,27 @@ void Client::readPendingDatagramsIP(){
 QByteArray Client::readUDPMsg(){
     QByteArray data2return = QByteArray();
     QNetworkDatagram datagram;
+    std::time_t reconnectTime = std::time(nullptr);
+
     //qDebug()<<"test1"<<endl;
-    while(UDPsocketComm->hasPendingDatagrams()){ //while theres datagrams to read
+    while(UDPsocketComm->hasPendingDatagrams()&& std::difftime(std::time(nullptr),reconnectTime)<UDPTIMEOUTSEC){ //while theres datagrams to read and before timeout
         //qDebug()<<"test2"<<endl;
         datagram = UDPsocketComm->receiveDatagram(); //receive UDP datagrams
+        data2return.append(datagram.data()); //Appends the byte array
+    }
+    return data2return;
+}
+
+QByteArray Client::readBroadMsg(){
+    QByteArray data2return = QByteArray();
+    QNetworkDatagram datagram;
+    std::time_t reconnectTime = std::time(nullptr);
+
+
+    //qDebug()<<"test1"<<endl;
+    while(UDPsocketBroadComm->hasPendingDatagrams() && std::difftime(std::time(nullptr),reconnectTime)<UDPTIMEOUTSEC){ //while theres datagrams to read and before timeout
+        //qDebug()<<"test2"<<endl;
+        datagram = UDPsocketBroadComm->receiveDatagram(); //receive UDP datagrams
         data2return.append(datagram.data()); //Appends the byte array
     }
     return data2return;

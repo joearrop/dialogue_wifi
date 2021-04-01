@@ -23,7 +23,7 @@ MainThread::MainThread(){
 }
 
 void MainThread::run(){
-    int iter = 0,socketWrite = 0;
+    int iter = 0,socketWrite = 0,protocol = UDPIP;
     bool connectedToHost = false;
     std::time_t reconnectTime;
     Client client;
@@ -42,11 +42,15 @@ void MainThread::run(){
     serial->setPortName(serialPortName);
     openSerialPort(serialPortName,serialPortBaudRate); //Open Serial port
 
+    //protocol = (argumentCount > 4) ? argumentList.at(4).toInt() : UDPBROAD; //Default = Broadcast
     //Client
     client.getServerIPv4ThroughUDPBroadcast();
     QThread::sleep(1); //just to give time to everything to be seted up before trying to read UDP datagrams
     client.readPendingDatagramsIP();
     connectedToHost = client.connectToHost();
+
+    client.bindBroadcommsocket();
+
     reconnectTime = std::time(nullptr);
 
     //Loop
@@ -92,9 +96,23 @@ void MainThread::run(){
 
                 */
                 //Receive data from PC-SOL through UDP/IP
-                ///*
+                /*
                 client.bindUDPcommsocket();
                 sock = client.readUDPMsg();
+
+                qDebug() << "lecture wifi HEX:" << sock.toHex()<<endl;
+                //QThread::sleep(3);
+                qDebug() << "serial.write(sock):" << serial->write(sock)<<endl;
+
+                socketWrite = client.TCPsocket->write(dataRead);
+
+                qDebug() << "client.socket->write(dataRead):" << socketWrite<<endl;
+                */
+
+                //Receive data from PC-SOL through Broadcast
+                ///*
+
+                sock = client.readBroadMsg();
 
                 qDebug() << "lecture wifi HEX:" << sock.toHex()<<endl;
                 //QThread::sleep(3);
