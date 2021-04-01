@@ -62,8 +62,8 @@ void MainThread::run(){
             //qDebug() << "dataRead HEX:" << dataRead.toHex()<<endl;
             link->send_feedback_Chariot("dataRead HEX:"+dataRead.toHex());
 
-            //qDebug() << "Connected to Host:" << connectedToHost <<endl;
-             link->send_feedback_PCSOL("Connected to Host: "+connectedToHost);
+            qDebug() << "Connected to Host:" << connectedToHost <<endl;
+             //link->send_feedback_PCSOL("Connected to Host: "+connectedToHost);
 
             if(connectedToHost){
                 //Receive data from PC-SOL through TCP/IP
@@ -78,6 +78,9 @@ void MainThread::run(){
                     link->send_feedback_Chariot("serial.write(sock):" + serial->write(sock));
 
                     socketWrite = client.TCPsocket->write(dataRead);
+                    //socketWrite = client.TCPsocket->write(QByteArray("test"));
+                    //client.TCPsocket->flush();
+                    client.TCPsocket->waitForBytesWritten();
 
                     //qDebug() << "client.socket->write(dataRead):" << socketWrite<<endl;
                     link->send_feedback_PCSOL("client.socket->write(dataRead):" + socketWrite);
@@ -94,7 +97,7 @@ void MainThread::run(){
                     link->send_feedback_Chariot("serial.write(vide1):" + serial->write(QByteArray()));
                 }
 
-                */
+                //*/
                 //Receive data from PC-SOL through UDP/IP
                 /*
                 client.bindUDPcommsocket();
@@ -107,11 +110,11 @@ void MainThread::run(){
                 socketWrite = client.TCPsocket->write(dataRead);
 
                 qDebug() << "client.socket->write(dataRead):" << socketWrite<<endl;
-                */
+                //*/
 
                 //Receive data from PC-SOL through Broadcast
                 ///*
-
+                //sock = client.TCPsocket->readAll();
                 sock = client.readBroadMsg();
 
                 qDebug() << "lecture wifi HEX:" << sock.toHex()<<endl;
@@ -119,8 +122,10 @@ void MainThread::run(){
                 qDebug() << "serial.write(sock):" << serial->write(sock)<<endl;
 
                 socketWrite = client.TCPsocket->write(dataRead);
+                //socketWrite = client.TCPsocket->write(QByteArray("test"));
+                client.TCPsocket->waitForBytesWritten();
 
-                qDebug() << "client.socket->write(dataRead):" << socketWrite<<endl;
+                qDebug() << "client.TCPsocket->write(dataRead):" << socketWrite<<endl;
                 //*/
 
 
