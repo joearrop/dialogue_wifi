@@ -29,7 +29,7 @@ void Client::getServerIPv4ThroughUDPBroadcast(){
 
 void Client::bindUDPcommsocket(){
     qDebug()<<"Connecting to subnet broadcast"<<SubNetBroadcastIPv4.c_str()<<endl;
-    UDPsocketComm->bind(QHostAddress(QString(SubNetBroadcastIPv4.c_str())),0); //To listen to the subnet broadcast ipv4 (e.g. 192.168.1.255), port 10000
+    UDPsocketComm->bind(QHostAddress(QString(SubNetBroadcastIPv4.c_str())),10000); //To listen to the subnet broadcast ipv4 (e.g. 192.168.1.255), port 10000
     connect(UDPsocketComm,&QUdpSocket::readyRead, this,&Client::readUDPMsg); //Connect ready signal from UDP socket to a slot where we can process that
 }
 
@@ -70,9 +70,9 @@ void Client::readPendingDatagramsIP(){
 QByteArray Client::readUDPMsg(){
     QByteArray data2return = QByteArray();
     QNetworkDatagram datagram;
-    qDebug()<<"test1"<<endl;
+    //qDebug()<<"test1"<<endl;
     while(UDPsocketComm->hasPendingDatagrams()){ //while theres datagrams to read
-        qDebug()<<"test2"<<endl;
+        //qDebug()<<"test2"<<endl;
         datagram = UDPsocketComm->receiveDatagram(); //receive UDP datagrams
         data2return.append(datagram.data()); //Appends the byte array
     }

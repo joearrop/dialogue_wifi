@@ -63,7 +63,7 @@ void MainThread::run(){
 
             if(connectedToHost){
                 //Receive data from PC-SOL through TCP/IP
-                // /*
+                /*
                 if(client.TCPsocket->waitForReadyRead()){
                     sock = client.TCPsocket->readAll();
 
@@ -90,9 +90,9 @@ void MainThread::run(){
                     link->send_feedback_Chariot("serial.write(vide1):" + serial->write(QByteArray()));
                 }
 
-                // */
+                */
                 //Receive data from PC-SOL through UDP/IP
-                /*
+                ///*
                 client.bindUDPcommsocket();
                 sock = client.readUDPMsg();
 
@@ -103,24 +103,12 @@ void MainThread::run(){
                 socketWrite = client.TCPsocket->write(dataRead);
 
                 qDebug() << "client.socket->write(dataRead):" << socketWrite<<endl;
-                */
+                //*/
 
 
-                if(std::difftime(std::time(nullptr),reconnectTime) > TIMEOUTSEC){ //redundant because of if(client.TCPsocket->waitForReadyRead())
-                    //To force reconnect
+                if(socketWrite<0){// disconnect if its not possible to send data to host
                     client.TCPsocket->disconnectFromHost();
                     connectedToHost = false;
-                }
-                else{
-                    if(socketWrite<0){// disconnect if its not possible to send data to host
-                        client.TCPsocket->disconnectFromHost();
-                        connectedToHost = false;
-                    }
-                    else{
-                        if(socketWrite!=0){// reset time just if evething is okay
-                            reconnectTime = std::time(nullptr);
-                        }
-                    }
                 }
 
 
@@ -142,11 +130,15 @@ void MainThread::run(){
             iter++;
         }
         //qDebug() << "disconnectiong from host" << endl;
-        link->send_feedback_PCSOL("disconnectiong from host");
+        link->send_feedback_PCSOL("disconnecting from host");
         client.TCPsocket->disconnectFromHost();
         //qDebug() << "closing Serial Port"<< endl;
         link->send_feedback_Chariot("closing Serial Port");
         closeSerialPort(path);
+        //client.TCPsocket->disconnectImpl();
+        qDebug() << client.TCPsocket->state() <<endl;
+        link->send_feedback_PCSOL("disconnected from host");
+
     }
 
 }
