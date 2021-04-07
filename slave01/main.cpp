@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
         sortieTerminal << QObject::tr("Connected To Port %1").arg(serialPortName) << endl;
         serial.setBaudRate(serialPortBaudRate);
         serial.setDataBits(QSerialPort::Data8);
-        serial.setParity(QSerialPort::EvenParity);
+        serial.setParity(QSerialPort::NoParity);
         serial.setStopBits(QSerialPort::OneStop);
         serial.setFlowControl(QSerialPort::NoFlowControl);
     }
